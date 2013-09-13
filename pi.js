@@ -6,10 +6,11 @@
  */
 (function (window) {
   "use strict";
-  var ihex;
-  var NTP = 25;
-  var buffer = new ArrayBuffer(1024 * 1024 * 8);
+  var ihex; // вычисляет hex по нецелому числу
+  var NTP = 25; // константа
+  var buffer = new ArrayBuffer(1024 * 1024 * 8); // буфер для представления, взят с запасом
 
+  // модуль series, самая долговязая функция
   var series = (function (stdlib, env, heap) {
     "use asm";
     var floor = stdlib.Math.floor;
@@ -18,36 +19,39 @@
     var tp = new stdlib.Float64Array(heap);
     var ntp = env.NTP | 0;
 
+    // возведение 16 в степень p и получение модуля ak
     function expm(p, ak) {
-      p = +p;
-      ak = +ak;
-      var i = 0;
-      var j = 0;
-      var p1 = 0.0;
-      var pt = 0.0;
-      var r = 0.0; // float as double
-      var di = 0;
-      var dd = 0.0;
-      i = i | 0;
-      j = j | 0;
-      ntp = ntp | 0;
+      p = +p; // double
+      ak = +ak; // double
+      var i = 0; // int
+      var j = 0; // int
+      var p1 = 0.0; // double
+      var pt = 0.0; // double
+      var r = 0.0;  // double
+      i = i | 0; // init
+      j = j | 0; // init
+      ntp = ntp | 0; // init
 
       if ((tp1 | 0) == 0) {
         tp1 = 1 | 0;
         tp[0] = +1;
+        // for (i = 1; i < ntp; i++)
         for (i = 1; (i | 0) < (ntp | 0); i = (i | 0) + 1 | 0) {
-          tp[((i | 0) << 3) >> 3] = +(+2 * tp[(((i - 1) | 0) << 3) >> 3]);
+          // tp[i] = 2 * tp[i - 1]
+          tp[(i << 3) >> 3] = +(+2 * tp[((i - 1) << 3) >> 3]);
         }
       }
-      if (+ak == 1.0) {
+      if (ak == 1.0) {
         return +0;
       }
+      // for (i = 0; i <ntp; i++)
       for (i = 0; (i | 0) < (ntp | 0); i = (i | 0) + 1 | 0) {
-        if (+tp[(i | 0) << 3 >> 3] > p) {
+        // if (tp[i] > p) break;
+        if (+tp[i << 3 >> 3] > p) {
           break;
         }
       }
-      pt = +tp[((i - 1) | 0) << 3 >> 3];
+      pt = +tp[(i - 1) << 3 >> 3];
       p1 = +p;
       r = +1;
       for (j = 0; (j | 0) <= (i | 0); j = (j | 0) + 1 | 0) {
@@ -59,11 +63,13 @@
         pt = 0.5 * pt;
         if (pt >= 1.) {
           r = r * r;
+          // js: r = r - floor(r / ak) * ak;
+          // c:  r = r - (int)(r / ak) * ak
           r = r - (+(floor(r / ak))) * ak;
         }
       }
 
-      return +r;
+      return +r; // return double, as 'double expm (...'
     }
 
     function series(m, id) {
@@ -75,7 +81,7 @@
       var p = 0.0;
       var s = 0.0;
       var t = 0.0;
-      eps = 0.00000000000000001;
+      eps = 0.00000000000000001; // 1e-17
       k = 0 | 0;
       for (k; (k | 0) < (id | 0); k = (k | 0) + 1 | 0) {
         ak = +8 * (+(k | 0)) + (+(m | 0));
@@ -112,6 +118,7 @@
     },
     buffer
   );
+  // calculate hex
   ihex = function (x, nhx, chx) {
     var i, y, hx = "0123456789ABCDEF";
 
@@ -121,6 +128,7 @@
       chx[i] = hx[y | 0];
     }
   };
+  // return hex pi from id character 10 chars
   window.pi = function (id) {
     var pid, s1, s2, s3, s4
       , hex = [];
