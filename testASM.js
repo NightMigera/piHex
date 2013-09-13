@@ -226,9 +226,9 @@
   );
   var t0, t1, t2;
   t0 = (new Date()).getTime();
-  series(1, 1000000);
+  series(1, 30000);
   t1 = (new Date()).getTime();
-  series2(1, 1000000);
+  series2(1, 30000);
   t2 = (new Date()).getTime();
   window.asmjs = ((t1 - t0)/(t2 - t1) < 0.85);
 })(window);
